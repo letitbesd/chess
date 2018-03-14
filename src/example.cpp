@@ -37,7 +37,10 @@ public:
         button->setResAnim(gameResources.getResAnim("button"));
 
         //centered button at screen
-        Vector2 pos = getStage()->getSize() / 2 - button->getSize() / 2;
+		Vector2 temppos = getStage()->getSize();
+		temppos.x -= button->getSize().x;
+		temppos.y /= 2;
+        Vector2 pos = temppos - button->getSize() / 2;
         button->setPosition(pos);
 
         //register  click handler to button
@@ -256,8 +259,15 @@ public:
 					char teamc = chesses[(int)(selected.x * COL_COUNT + selected.y)]->getChessTeam();
 					char teamc2 = chesses[(int)(r * COL_COUNT + c)]->getChessTeam();
 					if (teamc != teamc2) {
-						if (isPosValid(sp, i, j)) {
-							updatePosition(selected.x, selected.y, i, j, true); 
+						if (isPosValid(sp, i, j,true)) {
+							char diechess = chesses[(int)(r * COL_COUNT + c)]->getChessType();
+							updatePosition(selected.x, selected.y, i, j, true);
+							if (diechess == 'k') {
+								//gameover;
+								_text->setText(teamc == 'b' ? "Black Win" : "Red Win");
+
+
+							}
 						} 
 					}
 					else {
@@ -296,14 +306,29 @@ public:
 		}
 	}
 
-	bool isPosValid(spSprite sp, int i, int j) {
+	bool isPosValid(spSprite sp, int i, int j, bool eat=false) {
 		char typec = sp->getChessType();
+		char teamc = sp->getChessTeam();
+		bool isblack = teamc == 'b';
 		switch (typec)
 		{
 		case 'r':
 			if (selected.x == i || selected.y == j)
 			{
-
+				bool issamerow = selected.x == i;
+				bool issamecol = selected.y == j;
+				if (issamerow) {
+					if (isBlockedC_Horizontal(i, selected.y, j) != 0) {
+						return false;
+					}
+				}
+				else if (issamecol) {
+					if (isBlockedC(j, selected.x, i) != 0) {
+						return false;
+					}
+				}
+				else
+					return false;
 				return true;
 				 
 			}
@@ -323,7 +348,12 @@ public:
 			if (((int)(selected.x + selected.y) - (i + j)) % 4 == 0)
 			{
 				if (!isBlckedB(selected.x, selected.y, i, j))
-				{
+				{ 
+					//black row index is from 0 - 4, red is 5 - 9
+					if (isblack && i >= 5)
+						return false;
+					if (!isblack && i < 5)
+						return false;
 					return true;
 					 
 				}
@@ -345,18 +375,74 @@ public:
 			if (abs(selected.x - i) + abs(selected.y - j) == 1) {
 				if (3 <= j && j <= 5)
 				{
+					
 					return true;
 					 
+				}
+			}else if(eat) {
+				spSprite sp = chesses[i*COL_COUNT + j];
+				if (sp->getChessType() == 'k') {
+					if (abs(selected.y - j) == 0) {
+						if (isBlockedC(j, i, selected.x) == 0)
+							return true;
+					}
 				}
 			}
 			break;
 		case 'c':
-			 
-			 
+			 //pao is able to jump one target. d
+			
+			if (eat) {
+				bool issamerow = selected.x == i;
+				bool issamecol = selected.y == j;
+				if (issamerow) {
+					if (isBlockedC_Horizontal(i, selected.y, j) != 1) {
+						return false;
+					}
+				}
+				else if (issamecol) {
+					if (isBlockedC(j, selected.x, i) != 1) {
+						return false;
+					}
+				}
+				else
+					return false;
+			}
+			else { 
+				bool issamerow = selected.x == i;
+				bool issamecol = selected.y == j;
+				if (issamerow) { 
+					if (isBlockedC_Horizontal(i, selected.y, j)!= 0) {
+						return false;
+					}
+				}
+				else if (issamecol) {
+					if (isBlockedC(j, selected.x, i) != 0) {
+						return false;
+					}
+				}
+				else
+					return false;
+			}
+			return true;
 			break;
 		case 'p':
 			if (abs(selected.x - i) + abs(selected.y - j) == 1)
 			{ 
+				if (isblack)
+				{
+					if (i <= 4 && abs(selected.y - j) == 1)
+						return false;
+					if (i < selected.x)
+						return false;
+				}
+				else
+				{
+					if (i >=5 && abs(selected.y - j) == 1)
+						return false;
+					if (i > selected.x)
+						return false;
+				}  
 				return true;
 			}
 			break;
@@ -365,6 +451,35 @@ public:
 			break;
 		}
 		return false;
+	}
+	int isBlockedC_Horizontal(int row, int sc, int ec)
+	{
+		int change = abs(sc - ec);
+		if (change <= 1)
+			return false;
+		int inc = sc < ec ? 1 : -1;
+		int count = 0;
+		for (int k = sc + inc, i = 0; i < change - 1; k += inc)
+		{
+			i++;
+			count += chesses[row*COL_COUNT + k] == NULL ? 0 : 1;
+		}
+
+		return count ;
+	}
+	int isBlockedC(int col, int sr, int er) {
+		int change = abs(sr - er);
+		if (change <= 1)
+			return false;
+		int inc = sr < er ? 1 : -1;
+		int count = 0; 
+		for (int k = sr+inc, i=0; i < change-1; k += inc)
+		{
+			i++; 
+			count += chesses[k*COL_COUNT + col] == NULL ? 0 : 1;
+		}
+			
+		return count;
 	}
 	///pass in value is: x is row num, y is col num
 	bool isBlockedN(int oldx, int oldy, int newx, int newy) 
