@@ -52,8 +52,8 @@ void run()
 
 #if OXYGINE_SDL || OXYGINE_EMSCRIPTEN
     // The initial window size can be set up here on SDL builds
-    desc.w = 960;
-    desc.h = 640;
+    desc.w = 667;
+    desc.h = 430;
     // Marmalade settings can be modified from the emulator's menu
 #endif
 
@@ -65,7 +65,9 @@ void run()
     // Create the stage. Stage is a root node for all updateable and drawable objects
     Stage::instance = new Stage(true);
     Point size = core::getDisplaySize();
-    getStage()->setSize(size);
+	spStage stg = getStage();
+	stg->init(size, Point(667, 430));
+    //getStage()->setSize(size);
 
     // DebugActor is a helper actor node. It shows FPS, memory usage and other useful stuff
     //DebugActor::show();

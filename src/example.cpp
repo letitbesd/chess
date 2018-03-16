@@ -38,9 +38,10 @@ public:
 
         //centered button at screen
 		Vector2 temppos = getStage()->getSize();
-		temppos.x -= button->getSize().x;
-		temppos.y /= 2;
-        Vector2 pos = temppos - button->getSize() / 2;
+		Vector2 butsize = button->getSize();
+		Vector2 pos;
+		pos.x = temppos.x - butsize.x;
+		pos.y = temppos.y / 2 - butsize.y / 2;
         button->setPosition(pos);
 
         //register  click handler to button
@@ -74,18 +75,18 @@ public:
         text->setText("Click\nMe!");
 
         _text = text;
-		Vector2 pos3 = getStage()->getSize() / 2 - button->getSize() / 2;
+		Vector2 pos3(0,0);
 		//the game ui setup
 		spSprite sprite = new Sprite;
 		sprite->setResAnim(gameResources.getResAnim("bg"));
-		sprite->setAnchor(0.5f, 0.5f); 
-		sprite->setPosition(pos3); 
+		//sprite->setAnchor(0.5f, 0.5f); 
+		//sprite->setPosition(pos3); 
 		addChild(sprite);
 		sprite->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &MainActor::chessTouched));
 		_bgchess = sprite; 
 
-		PosOffset.x = pos3.x - _bgchess->getWidth() * 0.5;
-		PosOffset.y = pos3.y  - _bgchess->getHeight() * 0.5;
+		//PosOffset.x = pos3.x - _bgchess->getWidth() * 0.5;
+		//PosOffset.y = pos3.y  - _bgchess->getHeight() * 0.5;
 		int chesstype=-1;
 		selected.x = selected.y = -1;
 		std::string resid = "";
@@ -110,8 +111,8 @@ public:
 						sprite->setResAnim(gameResources.getResAnim(resid = "bk"));
 					 
 					Vector2 pos2; 
-					pos2.x =pos3.x + 41 * j  - _bgchess->getWidth() * 0.5;
-					pos2.y =pos3.y+ 41*i - _bgchess->getHeight() * 0.5;
+					pos2.x =pos3.x + 41 * j ;
+					pos2.y =pos3.y+ 41*i ;
 					sprite->setPosition(pos2);  
 					addChild(sprite);
 					sprite->setTouchEnabled(false); 
@@ -133,8 +134,8 @@ public:
 					else if (j == 4)
 						sprite->setResAnim(gameResources.getResAnim(resid = "rk"));
 					Vector2 pos2;
-					pos2.x = pos3.x + 41 * j - _bgchess->getWidth() * 0.5;
-					pos2.y = pos3.y + 41 * i - _bgchess->getHeight() * 0.5;
+					pos2.x = pos3.x + 41 * j;
+					pos2.y = pos3.y + 41 * i;
 					sprite->setPosition(pos2);
 					addChild(sprite); 
 					sprite->setTouchEnabled(false);
@@ -151,8 +152,8 @@ public:
 						 
 							sprite->setResAnim(gameResources.getResAnim(resid = "bc"));
 						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j - _bgchess->getWidth() * 0.5;
-						pos2.y = pos3.y + 41 * i - _bgchess->getHeight() * 0.5;
+						pos2.x = pos3.x + 41 * j ;
+						pos2.y = pos3.y + 41 * i ;
 						sprite->setPosition(pos2);
 						addChild(sprite);
 						sprite->setTouchEnabled(false);
@@ -169,8 +170,8 @@ public:
 
 						sprite->setResAnim(gameResources.getResAnim(resid = "rc"));
 						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j - _bgchess->getWidth() * 0.5;
-						pos2.y = pos3.y + 41 * i - _bgchess->getHeight() * 0.5;
+						pos2.x = pos3.x + 41 * j ;
+						pos2.y = pos3.y + 41 * i ;
 						sprite->setPosition(pos2);
 						addChild(sprite);
 						sprite->setTouchEnabled(false);
@@ -187,8 +188,8 @@ public:
 
 						sprite->setResAnim(gameResources.getResAnim(resid = "bp"));
 						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j - _bgchess->getWidth() * 0.5;
-						pos2.y = pos3.y + 41 * i - _bgchess->getHeight() * 0.5;
+						pos2.x = pos3.x + 41 * j ;
+						pos2.y = pos3.y + 41 * i ;
 						sprite->setPosition(pos2);
 						addChild(sprite);
 						sprite->setTouchEnabled(false);
@@ -203,8 +204,8 @@ public:
 
 						sprite->setResAnim(gameResources.getResAnim(resid = "rp"));
 						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j - _bgchess->getWidth() * 0.5;
-						pos2.y = pos3.y + 41 * i - _bgchess->getHeight() * 0.5;
+						pos2.x = pos3.x + 41 * j ;
+						pos2.y = pos3.y + 41 * i ;
 						sprite->setPosition(pos2);
 						addChild(sprite);
 						sprite->setTouchEnabled(false);
@@ -593,7 +594,9 @@ void example_init()
     //lets create our client code simple actor
     //spMainActor was defined above as smart intrusive pointer (read more: http://www.boost.org/doc/libs/1_60_0/libs/smart_ptr/intrusive_ptr.html)
     spMainActor actor = new MainActor;
-
+	actor->setAnchorInPixels(Vector2(0, 0));
+	//actor->setScale(Vector2(1.5, 1.5));
+	actor->setPosition(Vector2(0, 0));
     //and add it to Stage as child
     getStage()->addChild(actor);
 
