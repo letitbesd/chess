@@ -2,6 +2,7 @@
 #include <functional> 
 #include "Actor.h"
 #include <vector>
+#include <ctime>
 using namespace oxygine;
 
 //it is our resources
@@ -9,7 +10,7 @@ using namespace oxygine;
 //It is important on mobile devices with limited memory and you would load/unload them
 Resources gameResources;
 #include "Chess.h";
-
+std::clock_t start;
 class MainActor: public Actor
 {
 public:
@@ -266,8 +267,11 @@ public:
 							if (diechess == 'k') {
 								//gameover;
 								_text->setText(teamc == 'b' ? "Black Win" : "Red Win");
-
-
+								if (teamc == 'r')
+									start = std::clock() + CLOCKS_PER_SEC * 3;
+								else
+									_text->setText("Game Over");
+								
 							}
 						} 
 					}
@@ -582,31 +586,46 @@ typedef oxygine::intrusive_ptr<MainActor> spMainActor;
 //you could use DECLARE_SMART preprocessor definition it does the same:
 //DECLARE_SMART(MainActor, spMainActor)
 
-void example_preinit() {}
+void example_preinit() {
 
+	
+}
+
+void GameStart() {
+	spMainActor actor = new MainActor;
+	actor->setAnchorInPixels(Vector2(0, 0));
+	//actor->setScale(Vector2(1.5, 1.5));
+	actor->setPosition(Vector2(0, 0));
+	//and add it to Stage as child
+	getStage()->addChild(actor);
+}
 //called from main.cpp
 void example_init()
 {
     //load xml file with resources definition
-    gameResources.loadXML("res.xml");
 
 
     //lets create our client code simple actor
     //spMainActor was defined above as smart intrusive pointer (read more: http://www.boost.org/doc/libs/1_60_0/libs/smart_ptr/intrusive_ptr.html)
-    spMainActor actor = new MainActor;
-	actor->setAnchorInPixels(Vector2(0, 0));
-	//actor->setScale(Vector2(1.5, 1.5));
-	actor->setPosition(Vector2(0, 0));
-    //and add it to Stage as child
-    getStage()->addChild(actor);
+	gameResources.loadXML("res.xml");
 
+	GameStart();
 
 }
+
+
 
 
 //called each frame from main.cpp
 void example_update()
 {
+	if (start > 0 &&  std::clock() - start > 0)
+	{
+		 
+		getStage()->removeChildren();
+		GameStart();
+		start = 0;
+	}
 }
 
 //called each frame from main.cpp
