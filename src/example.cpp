@@ -4,6 +4,7 @@
 #include <vector>
 #include <ctime>
 using namespace oxygine;
+DECLARE_SMART(Chess, spChess);
 
 //it is our resources
 //in real project you would have more than one Resources declarations.
@@ -22,9 +23,8 @@ public:
 	const int COL_COUNT = 9;
 	const PointerState* touchedBy;
 	size_t size = 90;
-	spSprite chesses[90];
-	spSprite chesses2 [90];
-	Vector2 selected;
+	spChess chesses[90]; 
+	Point selected;
 	Vector2 PosOffset;
 	char nextTurn = 'r';
 	//rnbakcp
@@ -133,28 +133,20 @@ public:
 	}
 
 	void addSibling( std::string id, int i,int j) {
-		spSprite chess = new Sprite;
-		chess->setResAnim(gameResources.getResAnim(id));
-
+		 
 		Vector2 pos2;
 		pos2.x =   41 * j;
 		pos2.y =   41 * i;
-		chess->setPosition(pos2);
-		addChild(chess);
-		chess->setTouchEnabled(false);
-		chesses[i * COL_COUNT + j] = chess;
-		spSprite sbling = new Sprite;
-		sbling->setResAnim(gameResources.getResAnim(id + "s"));
-		int chesstype = -1; 
-		// r n b a k c p   0 1 2 3 4 5 6 7 
+		 
+		//// r n b a k c p   0 1 2 3 4 5 6 7 
 		char typec = id[1];
 		char teamc = id[0];
-		
-		sbling->setPosition(chess->getPosition());  
-		sbling->setTouchEnabled(false); 
-		chesses2[i * COL_COUNT + j] = sbling;
-		chess->setChessType(typec);
-		chess->setChessTeam(teamc);
+		//
+	 
+		spChess thechess = new Chess(id);
+		thechess->setPosition(pos2);
+		addChild(thechess);
+		chesses[i * COL_COUNT + j] = thechess;
 	}
 
 	void select(int c, int r) {
@@ -167,8 +159,7 @@ public:
 						//same chess
 					}
 					else {
-						chesses[i*COL_COUNT + j]->attachTo(this);
-						chesses2[i*COL_COUNT + j]->detach();
+						chesses[i*COL_COUNT + j]->Select(false);
 					}
 
 				} 
@@ -182,8 +173,8 @@ public:
 				if (selected.x >= 0 && selected.y >= 0)
 				{
 					//check if can eat 
-					spSprite sp = chesses[(int)(selected.x * COL_COUNT + selected.y)];
-					char teamc = chesses[(int)(selected.x * COL_COUNT + selected.y)]->getChessTeam();
+					spChess sp = chesses[(int)(selected.x * COL_COUNT + selected.y)];
+					char teamc = sp->getChessTeam();
 					char teamc2 = chesses[(int)(r * COL_COUNT + c)]->getChessTeam();
 					if (teamc != teamc2) {
 						if (isPosValid(sp, i, j,true)) {
@@ -200,17 +191,16 @@ public:
 							}
 						} 
 					}
-					else {
-						chesses2[i*COL_COUNT + j]->attachTo(this);
-						chesses[i*COL_COUNT + j]->detach();
+					else { 
+						chesses[i*COL_COUNT + j]->Select(true);
 						selected.x = i;
 						selected.y = j;
 					}
 				}
 				else
 				{
-					chesses2[i*COL_COUNT + j]->attachTo(this);
-					chesses[i*COL_COUNT + j]->detach();
+					 
+					chesses[i*COL_COUNT + j]->Select(true);
 					selected.x = i;
 					selected.y = j;
 				}
@@ -220,7 +210,7 @@ public:
 
 				if (selected.x >= 0 && selected.y >= 0) {
 					//move to new position
-					spSprite sp = chesses[(int)(selected.x * COL_COUNT + selected.y)];
+					spChess sp = chesses[(int)(selected.x * COL_COUNT + selected.y)];
 					if (isPosValid(sp, i, j)) {
 						updatePosition(selected.x, selected.y, i, j);
 					 }
@@ -236,7 +226,7 @@ public:
 		}
 	}
 
-	bool isPosValid(spSprite sp, int i, int j, bool eat=false) {
+	bool isPosValid(spChess sp, int i, int j, bool eat=false) {
 		char typec = sp->getChessType();
 		char teamc = sp->getChessTeam();
 		bool isblack = teamc == 'b';
@@ -310,7 +300,7 @@ public:
 					 
 				}
 			}else if(eat) {
-				spSprite sp = chesses[i*COL_COUNT + j];
+				spChess sp = chesses[i*COL_COUNT + j];
 				if (sp->getChessType() == 'k') {
 					if (abs(selected.y - j) == 0) {
 						if (isBlockedC(j, i, selected.x) == 0)
@@ -441,7 +431,7 @@ public:
 		return chesses[(int)(oldx*COL_COUNT + oldy)] != NULL;
 	}
 	bool updatePosition(int oldx, int oldy, int newx, int newy, bool eat = false) {
-		spSprite sprite =		chesses[(int)(oldx*COL_COUNT + oldy)];
+		spChess sprite =		chesses[(int)(oldx*COL_COUNT + oldy)];
 		selected.x = selected.y = -1;
 		if (sprite->getChessTeam() != nextTurn)
 			return false;
@@ -450,20 +440,17 @@ public:
 		if (eat) {
 			int i = newx;
 			int j = newy;
-			chesses[(int)(i * COL_COUNT + j)]->detach();
-			chesses2[(int)(i * COL_COUNT + j)]->detach();
-			chesses[(int)(i * COL_COUNT + j)] = NULL;
-			chesses2[(int)(i * COL_COUNT + j)] = NULL;
+			chesses[(int)(i * COL_COUNT + j)]->detach(); 
+			chesses[(int)(i * COL_COUNT + j)] = NULL; 
+
+
+
 		}
 		Vector2 newpos = Vector2(PosOffset.x + newy * 41, PosOffset.y + newx * 41);
 
-		chesses[(int)(newx*COL_COUNT + newy)] = chesses[(int)(oldx*COL_COUNT + oldy)];
-		chesses2[(int)(newx*COL_COUNT + newy)] = chesses2[(int)(oldx*COL_COUNT + oldy)];
-		chesses[(int)(newx*COL_COUNT + newy)]->setPosition(newpos);
-		chesses2[(int)(newx*COL_COUNT + newy)]->setPosition(newpos);
-
-		chesses[(int)(oldx*COL_COUNT + oldy)] = NULL;
-		chesses2[(int)(oldx*COL_COUNT + oldy)] = NULL;
+		chesses[(int)(newx*COL_COUNT + newy)] = chesses[(int)(oldx*COL_COUNT + oldy)]; 
+		chesses[(int)(newx*COL_COUNT + newy)]->setPosition(newpos);  
+		chesses[(int)(oldx*COL_COUNT + oldy)] = NULL; 
 		return true;
 	}
 	 
