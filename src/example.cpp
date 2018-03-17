@@ -27,6 +27,33 @@ public:
 	Vector2 selected;
 	Vector2 PosOffset;
 	char nextTurn = 'r';
+	//rnbakcp
+	char board[90] = {
+		'r', 'n', 'b', 'a', 'k', 'a','b','n', 'r',
+		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',
+		'x', 'c', 'x', 'x', 'x', 'x','x','c', 'x',
+		'p', 'x', 'p', 'x', 'p', 'x','p','x', 'p',
+		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',//----
+		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',//---
+		'p', 'x', 'p', 'x', 'p', 'x','p','x', 'p',
+		'x', 'c', 'x', 'x', 'x', 'x','x','c', 'x',
+		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',
+		'r', 'n', 'b', 'a', 'k', 'a','b','n', 'r',
+	};
+	char boardteam[90] = {
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',//-----4
+		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',//-----5
+		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
+		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
+		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
+		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
+	};
+
+	 
     MainActor():touchedBy(0)
     {
         //create button Sprite
@@ -75,9 +102,7 @@ public:
         text->setStyle(style);
         text->setText("Click\nMe!");
 
-        _text = text;
-		Vector2 pos3(0,0);
-		//the game ui setup
+        _text = text; 
 		spSprite sprite = new Sprite;
 		sprite->setResAnim(gameResources.getResAnim("bg"));
 		//sprite->setAnchor(0.5f, 0.5f); 
@@ -86,138 +111,38 @@ public:
 		sprite->addEventListener(TouchEvent::TOUCH_DOWN, CLOSURE(this, &MainActor::chessTouched));
 		_bgchess = sprite; 
 
-		//PosOffset.x = pos3.x - _bgchess->getWidth() * 0.5;
-		//PosOffset.y = pos3.y  - _bgchess->getHeight() * 0.5;
-		int chesstype=-1;
+		 
 		selected.x = selected.y = -1;
-		std::string resid = "";
-		for (int i  = 0; i < ROW_COUNT; i ++)
-			for (int j = 0; j < COL_COUNT; j++) {
-				 // r n b a k c p   0 1 2 3 4 5 6 7
-				if (i <1) {
-					spSprite sprite = new Sprite;
-					
-					if (j == 0 || j == 8) {
-
-						sprite->setResAnim(gameResources.getResAnim(resid = "br"));
-					}
-					else if(j == 1 || j == 7)
-						sprite->setResAnim(gameResources.getResAnim(resid = "bn"));
-					else if(j == 2|| j == 6)
-						sprite->setResAnim(gameResources.getResAnim(resid = "bb"));
-
-					else if(j == 3 || j == 5)
-						sprite->setResAnim(gameResources.getResAnim(resid = "ba"));
-					else if(j == 4)
-						sprite->setResAnim(gameResources.getResAnim(resid = "bk"));
-					 
-					Vector2 pos2; 
-					pos2.x =pos3.x + 41 * j ;
-					pos2.y =pos3.y+ 41*i ;
-					sprite->setPosition(pos2);  
-					addChild(sprite);
-					sprite->setTouchEnabled(false); 
-					chesses[i * COL_COUNT + j] = (sprite); 
-					addSibling(sprite, resid, i, j);
-				}
-				
-				else if (i > 8) {
-					spSprite sprite = new Sprite;
-					if (j == 0 || j == 8)
-						sprite->setResAnim(gameResources.getResAnim(resid = "rr"));
-					else if (j == 1 || j == 7)
-						sprite->setResAnim(gameResources.getResAnim(resid = "rn"));
-					else if (j == 2 || j == 6)
-						sprite->setResAnim(gameResources.getResAnim(resid = "rb"));
-
-					else if (j == 3 || j == 5)
-						sprite->setResAnim(gameResources.getResAnim(resid = "ra"));
-					else if (j == 4)
-						sprite->setResAnim(gameResources.getResAnim(resid = "rk"));
-					Vector2 pos2;
-					pos2.x = pos3.x + 41 * j;
-					pos2.y = pos3.y + 41 * i;
-					sprite->setPosition(pos2);
-					addChild(sprite); 
-					sprite->setTouchEnabled(false);
-					chesses[i * COL_COUNT + j] = (sprite);
-					addSibling(sprite, resid, i, j);
-				}
-
-				// second and seventh row
-				if (i == 2)
-				{
-					if (j == 1 || j == 7) 
-					{
-						spSprite sprite = new Sprite;
-						 
-							sprite->setResAnim(gameResources.getResAnim(resid = "bc"));
-						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j ;
-						pos2.y = pos3.y + 41 * i ;
-						sprite->setPosition(pos2);
-						addChild(sprite);
-						sprite->setTouchEnabled(false);
-						chesses[i * COL_COUNT + j] = (sprite);
-						addSibling(sprite, resid, i, j);
-					}
-				}
-				if (i == 7)
-
-				{
-					if (j == 1 || j == 7)
-					{
-						spSprite sprite = new Sprite;
-
-						sprite->setResAnim(gameResources.getResAnim(resid = "rc"));
-						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j ;
-						pos2.y = pos3.y + 41 * i ;
-						sprite->setPosition(pos2);
-						addChild(sprite);
-						sprite->setTouchEnabled(false);
-						chesses[i * COL_COUNT + j] = (sprite);
-						addSibling(sprite, resid, i, j);
-					}
-				}
-				//third and sixth row
-				if (i == 3)
-				{
-					if (j % 2 == 0)
-					{
-						spSprite sprite = new Sprite;
-
-						sprite->setResAnim(gameResources.getResAnim(resid = "bp"));
-						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j ;
-						pos2.y = pos3.y + 41 * i ;
-						sprite->setPosition(pos2);
-						addChild(sprite);
-						sprite->setTouchEnabled(false);
-						chesses[i * COL_COUNT + j] = (sprite);
-						addSibling(sprite, resid, i, j);
-					}
-				}
-				if (i == 6) {
-					if (j % 2 == 0)
-					{
-						spSprite sprite = new Sprite;
-
-						sprite->setResAnim(gameResources.getResAnim(resid = "rp"));
-						Vector2 pos2;
-						pos2.x = pos3.x + 41 * j ;
-						pos2.y = pos3.y + 41 * i ;
-						sprite->setPosition(pos2);
-						addChild(sprite);
-						sprite->setTouchEnabled(false);
-						chesses[i * COL_COUNT + j] = (sprite);
-						addSibling(sprite, resid, i, j);
-					}
-				}
-			}
+		initBoard();
     }
 
-	void addSibling(spSprite chess, std::string id, int i,int j) {
+	void initBoard() {
+		for (int i = 0; i < ROW_COUNT; i++) {
+			for (int j = 0; j < COL_COUNT; j++) 
+			{
+				if (board[i*COL_COUNT + j] != 'x') {
+					char id[3];
+					id[0] = boardteam[i*COL_COUNT + j];
+					id[1] = board[i*COL_COUNT + j];
+					id[2] = NULL;
+					std::string idstr(id);
+					addSibling(idstr, i, j);
+				}
+			}
+		}
+	}
+
+	void addSibling( std::string id, int i,int j) {
+		spSprite chess = new Sprite;
+		chess->setResAnim(gameResources.getResAnim(id));
+
+		Vector2 pos2;
+		pos2.x =   41 * j;
+		pos2.y =   41 * i;
+		chess->setPosition(pos2);
+		addChild(chess);
+		chess->setTouchEnabled(false);
+		chesses[i * COL_COUNT + j] = chess;
 		spSprite sbling = new Sprite;
 		sbling->setResAnim(gameResources.getResAnim(id + "s"));
 		int chesstype = -1; 
