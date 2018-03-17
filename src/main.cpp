@@ -20,7 +20,7 @@ int mainloop()
     // If input events are available, they are passed to Stage::instance.handleEvent
     // If the function returns true, it means that the user requested the application to terminate
     bool done = core::update();
-
+	
     // It gets passed to our example game implementation
     example_update();
 

@@ -11,6 +11,7 @@ DECLARE_SMART(Chess, spChess);
 //It is important on mobile devices with limited memory and you would load/unload them
 Resources gameResources;
 #include "Chess.h";
+#include "setup.h"
 std::clock_t start;
 class MainActor: public Actor
 {
@@ -27,39 +28,14 @@ public:
 	Point selected;
 	Vector2 PosOffset;
 	char nextTurn = 'r';
-	//rnbakcp
-	char board[90] = {
-		'r', 'n', 'b', 'a', 'k', 'a','b','n', 'r',
-		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',
-		'x', 'c', 'x', 'x', 'x', 'x','x','c', 'x',
-		'p', 'x', 'p', 'x', 'p', 'x','p','x', 'p',
-		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',//----
-		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',//---
-		'p', 'x', 'p', 'x', 'p', 'x','p','x', 'p',
-		'x', 'c', 'x', 'x', 'x', 'x','x','c', 'x',
-		'x', 'x', 'x', 'x', 'x', 'x','x','x', 'x',
-		'r', 'n', 'b', 'a', 'k', 'a','b','n', 'r',
-	};
-	char boardteam[90] = {
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',//-----4
-		'b', 'b', 'b', 'b', 'b', 'b','b','b', 'b',//-----5
-		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
-		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
-		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
-		'r', 'r', 'r', 'r', 'r', 'r','r','r', 'r',
-	};
+
 
 	 
     MainActor():touchedBy(0)
     {
         //create button Sprite
         spSprite button = new Sprite();
-		 
-		 
+		
         //setup it:
         //set button.png image. Resource 'button' defined in 'res.xml'
         button->setResAnim(gameResources.getResAnim("button"));
@@ -118,12 +94,18 @@ public:
 
 	void initBoard() {
 		for (int i = 0; i < ROW_COUNT; i++) {
-			for (int j = 0; j < COL_COUNT; j++) 
+			for (int j = 0; j < COL_COUNT; j++)
 			{
-				if (board[i*COL_COUNT + j] != 'x') {
+				if (board[gamelevel ][i*COL_COUNT + j] != 'x') {
 					char id[3];
-					id[0] = boardteam[i*COL_COUNT + j];
-					id[1] = board[i*COL_COUNT + j];
+					int typec = board[gamelevel][i*COL_COUNT + j];
+					if (typec >= 'a')
+						id[0] = 'b';
+					else {
+						typec += char_diff;//covert to small capital
+						id[0] = 'r';
+					}
+					id[1] = typec;
 					id[2] = NULL;
 					std::string idstr(id);
 					addSibling(idstr, i, j);
@@ -184,7 +166,10 @@ public:
 								//gameover;
 								_text->setText(teamc == 'b' ? "Black Win" : "Red Win");
 								if (teamc == 'r')
+								{
+									gamelevel ++;
 									start = std::clock() + CLOCKS_PER_SEC * 3;
+								}
 								else
 									_text->setText("Game Over");
 								
