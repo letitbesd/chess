@@ -3,6 +3,7 @@
 #include "Actor.h"
 #include <vector>
 #include <ctime>
+#include <random>
 using namespace oxygine;
 DECLARE_SMART(Chess, spChess);
 
@@ -12,9 +13,12 @@ DECLARE_SMART(Chess, spChess);
 Resources gameResources;
 #include "Chess.h";
 #include "setup.h"
+#include <thread>
 std::clock_t start;
 class MainActor: public Actor
 {
+private:
+	std::thread pthread;
 public:
     spTextField _text;
     spSprite    _button;
@@ -198,6 +202,7 @@ public:
 					spChess sp = chesses[(int)(selected.x * COL_COUNT + selected.y)];
 					if (isPosValid(sp, i, j)) {
 						updatePosition(selected.x, selected.y, i, j);
+						
 					 }
 
 				}
@@ -211,6 +216,37 @@ public:
 		}
 	}
 
+	int randomInt(int min, int max) {
+		std::random_device rd;  //Will be used to obtain a seed for the random number engine
+		std::mt19937 gen(rd()); //Standard mersenne_twister_engine seeded with rd()
+		std::uniform_int_distribution<> dis(min, max);
+		return dis(gen);
+		 
+	}
+	void ai_think() {
+		sleep(1000);
+		if (nextTurn == 'b') {
+			//randomize a move.
+			 
+			 
+			bool moved = false;
+			spChess movechess;
+			int i = 0, j = 0;
+			do {
+				int r = randomInt(0, 90 - 1);
+				movechess = chesses[r];
+				 
+			} while (movechess == NULL || movechess->getChessTeam() == 'r');
+			do
+			{ 
+				i = randomInt(0, ROW_COUNT - 1);
+				j = randomInt(0, COL_COUNT - 1);
+			}while (chesses[i*COL_COUNT + j] != NULL || !isPosValid(movechess, i, j));
+			int x = movechess->getPosition().x/41;
+			int y = movechess->getPosition().y / 41;
+			updatePosition(x, y, i, j); 
+		}
+	}
 	bool isPosValid(spChess sp, int i, int j, bool eat=false) {
 		char typec = sp->getChessType();
 		char teamc = sp->getChessTeam();
@@ -420,8 +456,9 @@ public:
 		selected.x = selected.y = -1;
 		if (sprite->getChessTeam() != nextTurn)
 			return false;
-		nextTurn = nextTurn == 'r' ? 'b' : 'r';
 
+		 
+		
 		if (eat) {
 			int i = newx;
 			int j = newy;
@@ -436,6 +473,13 @@ public:
 		chesses[(int)(newx*COL_COUNT + newy)] = chesses[(int)(oldx*COL_COUNT + oldy)]; 
 		chesses[(int)(newx*COL_COUNT + newy)]->setPosition(newpos);  
 		chesses[(int)(oldx*COL_COUNT + oldy)] = NULL; 
+
+		nextTurn = nextTurn == 'r' ? 'b' : 'r';
+		if (nextTurn == 'b')
+		{
+			pthread = std::thread(&MainActor::ai_think, this);
+			pthread.join();
+		}
 		return true;
 	}
 	 
